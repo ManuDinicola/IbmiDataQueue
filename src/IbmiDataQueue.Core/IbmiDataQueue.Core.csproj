@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>IbmiDataQueue</RootNamespace>
+    <PackageId>IbmiDataQueue.Core</PackageId>
+    <Description>Abstractions et pipeline de consommation de data queues IBM i : décodage, retry, dead-letter, télémétrie. Aucune dépendance à un driver.</Description>
+  </PropertyGroup>
+</Project>

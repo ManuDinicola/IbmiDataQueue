@@ -1,0 +1,24 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/samples/">
+    <Project Path="samples/IbmiDataQueue.Demo.Web/IbmiDataQueue.Demo.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/IbmiDataQueue.Core/IbmiDataQueue.Core.csproj" />
+    <Project Path="src/IbmiDataQueue.FileSystem/IbmiDataQueue.FileSystem.csproj" />
+    <Project Path="src/IbmiDataQueue.Hosting/IbmiDataQueue.Hosting.csproj" />
+    <Project Path="src/IbmiDataQueue.Sql/IbmiDataQueue.Sql.csproj" />
+    <Project Path="src/IbmiDataQueue.SqlServer/IbmiDataQueue.SqlServer.csproj" />
+    <Project Path="src/IbmiDataQueue.Testing/IbmiDataQueue.Testing.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/IbmiDataQueue.Core.Tests/IbmiDataQueue.Core.Tests.csproj" />
+    <Project Path="tests/IbmiDataQueue.IntegrationTests/IbmiDataQueue.IntegrationTests.csproj" />
+    <Project Path="tests/IbmiDataQueue.Sql.Tests/IbmiDataQueue.Sql.Tests.csproj" />
+    <Project Path="tests/IbmiDataQueue.SqlServer.Tests/IbmiDataQueue.SqlServer.Tests.csproj" />
+  </Folder>
+</Solution>

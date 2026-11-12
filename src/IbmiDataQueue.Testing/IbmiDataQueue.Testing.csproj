@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>IbmiDataQueue.Testing</RootNamespace>
+    <PackageId>IbmiDataQueue.Testing</PackageId>
+    <Description>Doubles de test pour IbmiDataQueue : data queue en mémoire, dead-letter en mémoire, handlers à base de délégués.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IbmiDataQueue.Core\IbmiDataQueue.Core.csproj" />
+  </ItemGroup>
+</Project>

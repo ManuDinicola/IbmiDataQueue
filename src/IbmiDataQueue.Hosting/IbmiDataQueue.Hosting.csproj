@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>IbmiDataQueue.Hosting</RootNamespace>
+    <PackageId>IbmiDataQueue.Hosting</PackageId>
+    <Description>Intégration Microsoft.Extensions.Hosting : BackgroundService et enregistrement DI d'un consommateur de data queue.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IbmiDataQueue.Core\IbmiDataQueue.Core.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+</Project>

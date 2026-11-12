@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>IbmiDataQueue.Sql</RootNamespace>
+    <PackageId>IbmiDataQueue.Sql</PackageId>
+    <Description>Adaptateur IBM i data queue via SQL (QSYS2.RECEIVE_DATA_QUEUE). Fonctionne avec n'importe quel DbConnection : IBM.Data.Db2, ODBC...</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IbmiDataQueue.Core\IbmiDataQueue.Core.csproj" />
+  </ItemGroup>
+</Project>

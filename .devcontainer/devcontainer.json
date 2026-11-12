@@ -1,0 +1,15 @@
+{
+  "name": "IbmiDataQueue (IBM i ODBC)",
+  "build": { "dockerfile": "Dockerfile" },
+  "remoteEnv": {
+    "IBMI_HOST": "pub400.com",
+    "IBMI_USER": "IDINICOLA",
+    "IBMI_LIBRARY": "IDINICOLA1",
+    "IBMI_ODBC_DRIVER": "IBM i Access ODBC Driver",
+    "IBMI_PASSWORD": "${localEnv:IBMI_PASSWORD}",
+    "DqTfm": "net10.0"
+  },
+  "customizations": {
+    "vscode": { "extensions": ["ms-dotnettools.csdevkit", "ms-dotnettools.csharp"] }
+  }
+}

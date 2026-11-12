@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>IbmiDataQueue.SqlServer</RootNamespace>
+    <PackageId>IbmiDataQueue.SqlServer</PackageId>
+    <Description>Dead-letter et état du disjoncteur dans SQL Server, pour plusieurs instances d'un même consommateur. Utilise n'importe quel DbConnection SQL Server fourni par l'appelant (Microsoft.Data.SqlClient...).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IbmiDataQueue.Core\IbmiDataQueue.Core.csproj" />
+  </ItemGroup>
+</Project>

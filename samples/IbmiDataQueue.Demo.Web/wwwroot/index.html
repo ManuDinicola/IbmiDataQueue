@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IBM i Data Queue</title>
+<style>
+  :root { --bg:#fff; --fg:#1b1f24; --mut:#6b7280; --line:#e5e7eb; --ok:#0a7d33; --bad:#b42318; --acc:#2563eb; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#111418; --fg:#e6e8eb; --mut:#9aa3af; --line:#2a2f37; --ok:#4ade80; --bad:#f87171; --acc:#60a5fa; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 system-ui,sans-serif; }
+  main { max-width:960px; margin:0 auto; padding:24px 16px; }
+  h1 { font-size:20px; margin:0 0 4px; } .sub { color:var(--mut); margin:0 0 20px; }
+  form { display:grid; grid-template-columns:1fr 1fr 2fr auto; gap:8px; align-items:end; margin-bottom:8px; }
+  label { display:block; font-size:12px; color:var(--mut); }
+  input { width:100%; box-sizing:border-box; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg); font:inherit; }
+  button { padding:8px 14px; border:0; border-radius:6px; background:var(--acc); color:#fff; font:inherit; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--acc); border:1px solid var(--line); }
+  .row { display:flex; gap:8px; margin:8px 0 12px; } .row input { flex:1; }
+  #msg { min-height:20px; margin:0 0 8px; font-size:13px; } .err { color:var(--bad); } .good { color:var(--ok); }
+  h2 { font-size:14px; margin:20px 0 6px; text-transform:uppercase; letter-spacing:.04em; color:var(--mut); }
+  table { width:100%; border-collapse:collapse; font-size:14px; } th,td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--mut); font-weight:500; } code { font-family:ui-monospace,Consolas,monospace; font-size:13px; word-break:break-all; } .empty { color:var(--mut); padding:8px 0; }
+  @media (max-width:640px) { form { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>IBM i Data Queue</h1>
+  <p class="sub">Queue : <code id="queue">…</code> — publiez un message : il est envoyé à l'IBM i, lu par le consommateur puis décodé ici.</p>
+
+  <form id="f">
+    <div><label for="id">Id (max 6)</label><input id="id" maxlength="6" value="42"></div>
+    <div><label for="type">Type (max 4)</label><input id="type" maxlength="4" value="NEW"></div>
+    <div><label for="payload">Payload (max 20)</label><input id="payload" maxlength="20" value="hello"></div>
+    <button>Publier</button>
+  </form>
+  <div class="row">
+    <input id="raw" maxlength="30" placeholder="Texte brut libre, 30 caractères max (ex. ABC) pour provoquer un rejet">
+    <button class="ghost" id="sendRaw" type="button">Publier brut</button>
+  </div>
+  <p id="msg"></p>
+
+  <h2>Messages décodés</h2>
+  <table><thead><tr><th>Heure</th><th>Id</th><th>Type</th><th>Payload</th></tr></thead><tbody id="ok"></tbody></table>
+  <div class="empty" id="okEmpty">Aucun message reçu pour l'instant.</div>
+
+  <h2>Messages rejetés (dead-letter)</h2>
+  <table><thead><tr><th>Heure</th><th>Raison</th><th>Erreur</th><th>Contenu</th></tr></thead><tbody id="ko"></tbody></table>
+  <div class="empty" id="koEmpty">Aucun rejet.</div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const time = iso => new Date(iso).toLocaleTimeString();
+function say(text, bad) { $('msg').className = bad ? 'err' : 'good'; $('msg').textContent = text; }
+
+async function publish(body) {
+  try {
+    const r = await fetch('/api/publish', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    r.ok ? say('Envoyé (' + j.sent + ' octets).') : say(j.error || 'Erreur ' + r.status, true);
+  } catch (e) { say(String(e), true); }
+}
+$('f').addEventListener('submit', e => { e.preventDefault(); publish({ id:$('id').value, type:$('type').value, payload:$('payload').value }); });
+$('sendRaw').addEventListener('click', () => publish({ raw:$('raw').value }));
+
+async function refresh() {
+  try {
+    const s = await (await fetch('/api/state')).json();
+    $('queue').textContent = s.queue;
+    $('ok').innerHTML = s.received.map(m => `<tr><td>${time(m.at)}</td><td><code>${esc(m.id)}</code></td><td><code>${esc(m.type)}</code></td><td>${esc(m.payload)}</td></tr>`).join('');
+    $('okEmpty').hidden = s.received.length > 0;
+    $('ko').innerHTML = s.deadLetters.map(d => `<tr><td>${time(d.at)}</td><td>${esc(d.reason)}</td><td>${esc(d.error)}</td><td><code>${esc(d.text)}</code><br><code>${esc(d.hex)}</code></td></tr>`).join('');
+    $('koEmpty').hidden = s.deadLetters.length > 0;
+  } catch (e) { /* serveur indisponible : on réessaie */ }
+}
+refresh(); setInterval(refresh, 1000);
+</script>
+</body>
+</html>

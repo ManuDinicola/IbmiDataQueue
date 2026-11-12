@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2" />
+    <!-- Seul fichier dépendant d'ODBC : IntegrationConnection.cs. Pour IBM.Data.Db2, remplacer ce fichier. -->
+    <PackageReference Include="System.Data.Odbc" Version="10.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IbmiDataQueue.Core\IbmiDataQueue.Core.csproj" />
+    <ProjectReference Include="..\..\src\IbmiDataQueue.Testing\IbmiDataQueue.Testing.csproj" />
+    <ProjectReference Include="..\..\src\IbmiDataQueue.Sql\IbmiDataQueue.Sql.csproj" />
+    <!-- Message « Echo » partagé avec les tests unitaires -->
+    <Compile Include="..\IbmiDataQueue.Core.Tests\EchoMessage.cs" Link="EchoMessage.cs" />
+  </ItemGroup>
+</Project>

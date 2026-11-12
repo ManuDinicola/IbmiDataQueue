@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>IbmiDataQueue.FileSystem</RootNamespace>
+    <PackageId>IbmiDataQueue.FileSystem</PackageId>
+    <Description>Dead-letter et état du disjoncteur sur disque (JSON). Exemple d'implémentation sans base de données ; pour plusieurs instances, le dossier doit être un disque local partagé fiable (pas un partage réseau).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IbmiDataQueue.Core\IbmiDataQueue.Core.csproj" />
+  </ItemGroup>
+</Project>

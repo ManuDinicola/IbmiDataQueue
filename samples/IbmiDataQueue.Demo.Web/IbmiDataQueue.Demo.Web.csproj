@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>IbmiDataQueue.Demo.Web</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Seul package dépendant du pilote : System.Data.Odbc (voir Program.cs, OpenAsync). -->
+    <PackageReference Include="System.Data.Odbc" Version="10.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IbmiDataQueue.Core\IbmiDataQueue.Core.csproj" />
+    <ProjectReference Include="..\..\src\IbmiDataQueue.Sql\IbmiDataQueue.Sql.csproj" />
+    <ProjectReference Include="..\..\src\IbmiDataQueue.Hosting\IbmiDataQueue.Hosting.csproj" />
+  </ItemGroup>
+</Project>
