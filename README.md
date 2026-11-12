@@ -144,6 +144,26 @@ Le pilote Windows (IBM i Access Client Solutions) demande un compte IBM ; le pil
 
 `samples/IbmiDataQueue.Demo.Web` : une page web pour publier un message dans une data queue (`IDINICOLA1/DEMOQ`, créée au démarrage), le voir lu par le consommateur et décodé (Id 6 + Type 4 + Payload 20 = 30 octets **EBCDIC**), ou rejeté en dead-letter avec ses octets.
 
+### En images
+
+**1. Publier depuis .NET (publish / subscribe)** : le message part dans la data queue de l'IBM i, le consommateur .NET le lit et le décode.
+
+![Publier depuis .NET](docs/screenshots/02-publier-dotnet.png)
+
+**2. Appeler le programme COBOL `HELLOCBL`** : `CALL HELLOCBL(?, ?, ?)` par ODBC ; la salutation et le code retour reviennent dans les paramètres de sortie.
+
+![Appel du COBOL HELLOCBL](docs/screenshots/03-appel-cobol-hellocbl.png)
+
+**3. Le COBOL publie lui-même (`SENDDQ`)** : le programme écrit dans la queue avec `QSNDDTAQ`, le consommateur .NET le décode comme n'importe quel autre message (ligne `2 / COB`).
+
+![COBOL publie dans la queue](docs/screenshots/04-cobol-publie-dans-la-queue.png)
+
+**4. Message invalide → dead-letter** : un message de 3 octets au lieu de 30 est rejeté, avec ses octets en texte et en hexadécimal (EBCDIC : `ABC` = `C1C2C3`).
+
+![Message rejeté](docs/screenshots/05-message-rejete.png)
+
+Les captures sont générées par un script Playwright qui pilote la page ; elles ne contiennent aucun identifiant.
+
 Deux programmes COBOL de démonstration (`ibmi/*.cbl`) sont appelés depuis .NET :
 
 | Programme | Procédure SQL | Rôle |
