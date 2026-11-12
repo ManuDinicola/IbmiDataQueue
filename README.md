@@ -130,7 +130,28 @@ Ce que les tests vérifient :
 3. Le pipeline traite un message valide, envoie un message invalide au dead-letter, puis signale la queue vide.
 4. Un message texte est converti dans le CCSID du job : ajuster `IBMI_CODEPAGE` si besoin.
 
-> Ces tests n'ont pas pu être exécutés lors de leur écriture (pas d'accès IBM i). Les noms de paramètres des procédures `SEND_DATA_QUEUE*` et le comportement exact de `RECEIVE_DATA_QUEUE` sont à confirmer au premier lancement.
+> Ces 4 tests ont été exécutés avec succès contre le serveur public PUB400 (pilote ODBC Linux dans Docker, voir ci-dessous).
+
+### Sous Windows sans le pilote IBM : Docker
+
+Le pilote Windows (IBM i Access Client Solutions) demande un compte IBM ; le pilote Linux, lui, est public. Le dossier `.devcontainer/` contient l'image Docker (`unixODBC` + `ibm-iaccess`) :
+
+- `debug-tests.ps1` lance les tests d'intégration dans le conteneur et attend Visual Studio (Debug > Attach to Process > Docker (Linux Container) > `dqtest`).
+- `run-demo.ps1` lance l'application de démonstration (ci-dessous) sur http://localhost:5080.
+- `IBMI_PASSWORD` est lu dans la variable d'environnement utilisateur Windows ; l'hôte, l'utilisateur et la bibliothèque sont en tête des scripts.
+
+## Application de démonstration
+
+`samples/IbmiDataQueue.Demo.Web` : une page web pour publier un message dans une data queue (`IDINICOLA1/DEMOQ`, créée au démarrage), le voir lu par le consommateur et décodé (Id 6 + Type 4 + Payload 20 = 30 octets **EBCDIC**), ou rejeté en dead-letter avec ses octets.
+
+Deux programmes COBOL de démonstration (`ibmi/*.cbl`) sont appelés depuis .NET :
+
+| Programme | Procédure SQL | Rôle |
+|---|---|---|
+| `HELLOCBL` | `HELLOCBL(IN P_NAME, OUT P_GREET, OUT P_RC)` | Renvoie une salutation et un code retour (`/api/hello`). |
+| `SENDDQ` | `SENDDQ(IN P_ID, IN P_TYPE, IN P_PAYLOAD)` | Écrit un message dans la data queue avec `QSNDDTAQ` ; le consommateur .NET le décode (`/api/cobol-send`). |
+
+`install-ibmi.ps1` crée les membres source dans `QCBLLESRC`, compile avec `CRTBNDCBL` et déclare les procédures SQL (`LANGUAGE COBOL`, `PARAMETER STYLE GENERAL`). `SENDDQ` est codé en dur pour la queue `IDINICOLA1/DEMOQ` : adapter `DQ-LIB` et `DQ-NAME` dans `ibmi/SENDDQ.cbl`. Limite connue de `HELLOCBL` : le nom est coupé au premier espace (`DELIMITED BY SPACE`).
 
 ## Prochaines étapes
 

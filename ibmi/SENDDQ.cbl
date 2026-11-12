@@ -1,0 +1,22 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. SENDDQ.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 DQ-NAME   PIC X(10) VALUE "DEMOQ".
+       01 DQ-LIB    PIC X(10) VALUE "IDINICOLA1".
+       01 DQ-LEN    PIC S9(5) COMP-3 VALUE 30.
+       01 DQ-DATA.
+          05 DQ-ID      PIC X(6).
+          05 DQ-TYPE    PIC X(4).
+          05 DQ-PAYLOAD PIC X(20).
+       LINKAGE SECTION.
+       01 P-ID      PIC X(6).
+       01 P-TYPE    PIC X(4).
+       01 P-PAYLOAD PIC X(20).
+       PROCEDURE DIVISION USING P-ID P-TYPE P-PAYLOAD.
+       MAIN.
+           MOVE P-ID TO DQ-ID.
+           MOVE P-TYPE TO DQ-TYPE.
+           MOVE P-PAYLOAD TO DQ-PAYLOAD.
+           CALL "QSNDDTAQ" USING DQ-NAME DQ-LIB DQ-LEN DQ-DATA.
+           GOBACK.
