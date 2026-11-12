@@ -3,12 +3,23 @@ using System.Text;
 
 namespace IbmiDataQueue.Demo.Web;
 
-/// <summary>Message métier de la démo : Id(6) + Type(4) + Payload(20) = 30 octets ASCII.</summary>
+/// <summary>Message métier de la démo : Id(6) + Type(4) + Payload(20) = 30 octets EBCDIC (CCSID du job IBM i).</summary>
 public sealed record DemoMessage(string Id, string Type, string Payload);
 
 public sealed class DemoCodec : IMessageCodec<DemoMessage>
 {
-    public static readonly FixedWidthLayout Layout = new(Encoding.ASCII, [6, 4, 20]);
+    /// <summary>Encodage des messages : EBCDIC, comme ce qu'écrit un programme IBM i. Code page par IBMI_CODEPAGE (37 par défaut).</summary>
+    public static readonly Encoding Text = CreateEncoding();
+
+    public static readonly FixedWidthLayout Layout = new(Text, [6, 4, 20]);
+
+    private static Encoding CreateEncoding()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        return int.TryParse(Environment.GetEnvironmentVariable("IBMI_CODEPAGE"), out var codePage)
+            ? Encoding.GetEncoding(codePage)
+            : Encoding.GetEncoding(37);
+    }
 
     public DemoMessage Decode(ReadOnlySpan<byte> payload)
     {
@@ -17,7 +28,7 @@ public sealed class DemoCodec : IMessageCodec<DemoMessage>
     }
 
     public static byte[] Encode(string id, string type, string payload) =>
-        Encoding.ASCII.GetBytes(id.PadRight(6) + type.PadRight(4) + payload.PadRight(20));
+        Text.GetBytes(id.PadRight(6) + type.PadRight(4) + payload.PadRight(20));
 }
 
 public sealed record ReceivedItem(DateTimeOffset At, string Id, string Type, string Payload);
@@ -77,7 +88,7 @@ public sealed class FeedDeadLetterSink : IDeadLetterSink
             letter.Reason.ToString(),
             letter.Error.Message,
             bytes.Length,
-            Encoding.ASCII.GetString(bytes),
+            DemoCodec.Text.GetString(bytes),
             Convert.ToHexString(bytes)));
         return ValueTask.CompletedTask;
     }

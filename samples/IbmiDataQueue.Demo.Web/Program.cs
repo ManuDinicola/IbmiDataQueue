@@ -81,7 +81,7 @@ app.MapPost("/api/publish", async (PublishRequest request) =>
     byte[] payload;
     if (!string.IsNullOrEmpty(request.Raw))
     {
-        payload = Encoding.ASCII.GetBytes(request.Raw);
+        payload = DemoCodec.Text.GetBytes(request.Raw);
         if (payload.Length > 30)
         {
             return Results.BadRequest(new { error = "La data queue accepte 30 octets maximum (MAXLEN 30)." });
@@ -114,6 +114,60 @@ app.MapPost("/api/publish", async (PublishRequest request) =>
     }
 
     return Results.Ok(new { sent = payload.Length });
+});
+
+// Appelle le programme COBOL IDINICOLA1/HELLOCBL via la procédure SQL qui l'enveloppe (voir README du dossier).
+app.MapGet("/api/hello", async (string? name) =>
+{
+    try
+    {
+        await using var connection = await OpenAsync(CancellationToken.None);
+        await using var command = (OdbcCommand)connection.CreateCommand();
+        command.CommandText = $"CALL {queue.Library}.HELLOCBL(?, ?, ?)";
+        command.Parameters.Add(new OdbcParameter { OdbcType = OdbcType.Char, Size = 20, Value = (name ?? string.Empty).PadRight(20) });
+        var greeting = new OdbcParameter { Direction = System.Data.ParameterDirection.Output, OdbcType = OdbcType.Char, Size = 40 };
+        var returnCode = new OdbcParameter { Direction = System.Data.ParameterDirection.Output, OdbcType = OdbcType.Int };
+        command.Parameters.Add(greeting);
+        command.Parameters.Add(returnCode);
+        await command.ExecuteNonQueryAsync();
+        return Results.Ok(new
+        {
+            greeting = Convert.ToString(greeting.Value, CultureInfo.InvariantCulture)?.TrimEnd(),
+            returnCode = Convert.ToInt32(returnCode.Value, CultureInfo.InvariantCulture),
+        });
+    }
+    catch (DbException ex)
+    {
+        return Results.Json(new { error = ex.Message }, statusCode: 502);
+    }
+});
+
+// Le programme COBOL IDINICOLA1/SENDDQ écrit lui-même un message dans la data queue (API QSNDDTAQ) : le consommateur le décode ensuite.
+app.MapPost("/api/cobol-send", async (PublishRequest request) =>
+{
+    var id = request.Id ?? string.Empty;
+    var type = request.Type ?? string.Empty;
+    var text = request.Payload ?? string.Empty;
+    if (id.Length > 6 || type.Length > 4 || text.Length > 20)
+    {
+        return Results.BadRequest(new { error = "Id max 6, Type max 4, Payload max 20 caractères." });
+    }
+
+    try
+    {
+        await using var connection = await OpenAsync(CancellationToken.None);
+        await using var command = (OdbcCommand)connection.CreateCommand();
+        command.CommandText = $"CALL {queue.Library}.SENDDQ(?, ?, ?)";
+        command.Parameters.Add(new OdbcParameter { OdbcType = OdbcType.Char, Size = 6, Value = id.PadRight(6) });
+        command.Parameters.Add(new OdbcParameter { OdbcType = OdbcType.Char, Size = 4, Value = type.PadRight(4) });
+        command.Parameters.Add(new OdbcParameter { OdbcType = OdbcType.Char, Size = 20, Value = text.PadRight(20) });
+        await command.ExecuteNonQueryAsync();
+        return Results.Ok(new { sent = 30 });
+    }
+    catch (DbException ex)
+    {
+        return Results.Json(new { error = ex.Message }, statusCode: 502);
+    }
 });
 
 app.Run();

@@ -40,6 +40,14 @@
   </div>
   <p id="msg"></p>
 
+  <h2>Programmes COBOL sur l'IBM i</h2>
+  <div class="row">
+    <input id="name" maxlength="20" placeholder="Nom (ex. WORLD)" value="WORLD">
+    <button class="ghost" id="hello" type="button">Appeler HELLOCBL</button>
+    <button class="ghost" id="cobolSend" type="button">SENDDQ : COBOL publie dans la queue</button>
+  </div>
+  <p id="hello-out" class="sub"></p>
+
   <h2>Messages décodés</h2>
   <table><thead><tr><th>Heure</th><th>Id</th><th>Type</th><th>Payload</th></tr></thead><tbody id="ok"></tbody></table>
   <div class="empty" id="okEmpty">Aucun message reçu pour l'instant.</div>
@@ -63,6 +71,20 @@ async function publish(body) {
 }
 $('f').addEventListener('submit', e => { e.preventDefault(); publish({ id:$('id').value, type:$('type').value, payload:$('payload').value }); });
 $('sendRaw').addEventListener('click', () => publish({ raw:$('raw').value }));
+$('hello').addEventListener('click', async () => {
+  try {
+    const r = await fetch('/api/hello?name=' + encodeURIComponent($('name').value));
+    const j = await r.json();
+    $('hello-out').textContent = r.ok ? `${j.greeting} (code retour ${j.returnCode})` : (j.error || 'Erreur ' + r.status);
+  } catch (e) { $('hello-out').textContent = String(e); }
+});
+$('cobolSend').addEventListener('click', async () => {
+  try {
+    const r = await fetch('/api/cobol-send', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id:$('id').value, type:$('type').value, payload:$('payload').value }) });
+    const j = await r.json().catch(() => ({}));
+    $('hello-out').textContent = r.ok ? 'SENDDQ a écrit le message dans la queue : il va apparaître ci-dessous.' : (j.error || 'Erreur ' + r.status);
+  } catch (e) { $('hello-out').textContent = String(e); }
+});
 
 async function refresh() {
   try {
